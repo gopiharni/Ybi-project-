@@ -1,0 +1,270 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "KkHRsIKN_hrt"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Title of the project: MOVIE RECOMMENDATION SYSTEM\n"
+      ],
+      "metadata": {
+        "id": "WsTzIyZO_j_8"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "**Objective**:1.Enhancing User Experience: By recommending movies that align with users' tastes and preferences, the system aims to enhance user satisfaction and engagement with the platform.\n",
+        "\n",
+        "2.Increasing Engagement and Retention: A well-performing recommendation system can increase user engagement by keeping users interested and exploring more content, thus improving platform retention.\n",
+        "\n",
+        "3.Optimizing Content Discovery: Users often face difficulty in discovering relevant content from vast libraries. The recommendation system helps in efficiently surfacing movies that users are likely to enjoy but might not have discovered otherwise.\n",
+        "\n",
+        "4.Driving Revenue: In platforms with monetization models such as streaming services, effective recommendations can lead to increased consumption and potentially higher revenue through subscriptions or ad views.\n",
+        "\n",
+        "5.Personalization: The system aims to tailor recommendations based on individual user behavior, preferences, past interactions, demographics, and contextual factors to deliver a personalized experience.\n",
+        "\n",
+        "6.Scalability and Efficiency: Recommendations should be generated in real-time or near real-time, scalable to handle large user bases and diverse content catalogs, and efficient in computation and resource utilization.\n",
+        "\n",
+        "Overall, the key objective of a movie recommendation system is to create a seamless and personalized experience that encourages users to discover and consume relevant content, thereby benefiting both users and content providers/platforms.\n",
+        "\n",
+        "\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "YcZDxCaCDiOM"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#IMPORT LIBRARY\n",
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "from sklearn.feature_extraction.text import TfidfVectorizer\n",
+        "from sklearn.metrics.pairwise import cosine_similarity\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.ensemble import RandomForestRegressor\n",
+        "from sklearn.metrics import mean_squared_error\n",
+        "import matplotlib.pyplot as plt\n",
+        "import seaborn as sns\n"
+      ],
+      "metadata": {
+        "id": "6A11lAYQEKY7"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#IMPORT DATA\n",
+        "# Assuming 'movies.csv' contains columns: 'title', 'genre', 'rating'\n",
+        "def import_data(file_path):\n",
+        "    return pd.read_csv(file_path)\n",
+        "\n",
+        "# Importing data\n",
+        "file_path = 'movies.csv'  # Replace with your file path\n",
+        "movies_data = import_data(file_path)\n"
+      ],
+      "metadata": {
+        "id": "fMpn1VCEEa30"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#DESCRIBE DATA\n",
+        "# Describe the data\n",
+        "def describe_data(data):\n",
+        "    return data.describe()\n",
+        "\n",
+        "# Example of data description\n",
+        "data_description = describe_data(movies_data)\n",
+        "print(data_description)\n"
+      ],
+      "metadata": {
+        "id": "ATrw4A4nEngV"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#DATA VISUALIZATION\n",
+        "# Data visualization\n",
+        "def visualize_data(data):\n",
+        "    sns.histplot(data['rating'], kde=True)\n",
+        "    plt.title('Distribution of Ratings')\n",
+        "    plt.xlabel('Rating')\n",
+        "    plt.ylabel('Count')\n",
+        "    plt.show()\n",
+        "\n",
+        "# Example of data visualization\n",
+        "visualize_data(movies_data)\n"
+      ],
+      "metadata": {
+        "id": "YSvmhrrAFIfe"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#DATA PREPROCESSING\n",
+        "# Data preprocessing\n",
+        "def preprocess_data(data):\n",
+        "    # Drop rows with missing values\n",
+        "    data = data.dropna(subset=['title', 'genre', 'rating'])\n",
+        "\n",
+        "    # Convert genres to lowercase\n",
+        "    data['genre'] = data['genre'].str.lower()\n",
+        "\n",
+        "    return data\n",
+        "\n",
+        "# Example of data preprocessing\n",
+        "movies_data = preprocess_data(movies_data)\n"
+      ],
+      "metadata": {
+        "id": "-b7H1e4uGd99"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#DEFINE TARGET VARIABLE AND FEATURE VARIABLE\n",
+        "# Define target variable\n",
+        "X = movies_data[['title', 'genre']]\n",
+        "y = movies_data['rating']\n"
+      ],
+      "metadata": {
+        "id": "-57i2fQlLgT_"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#TRAIN TEST SPLIT\n",
+        "# Train-test split\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n"
+      ],
+      "metadata": {
+        "id": "mJzKnC6wLzBG"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#MODELING\n",
+        "# Modeling (dummy example with RandomForestRegressor)\n",
+        "tfidf_vectorizer = TfidfVectorizer(stop_words='english')\n",
+        "X_train_tfidf = tfidf_vectorizer.fit_transform(X_train['title'])\n",
+        "\n",
+        "model = RandomForestRegressor(n_estimators=100, random_state=42)\n",
+        "model.fit(X_train_tfidf, y_train)\n"
+      ],
+      "metadata": {
+        "id": "pDmAzuESL-sR"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Model evaluation\n",
+        "X_test_tfidf = tfidf_vectorizer.transform(X_test['title'])\n",
+        "predictions = model.predict(X_test_tfidf)\n",
+        "\n",
+        "mse = mean_squared_error(y_test, predictions)\n",
+        "print(f'Mean Squared Error: {mse}')\n"
+      ],
+      "metadata": {
+        "id": "FM-E2jR8MILD"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Prediction example\n",
+        "def predict_rating(movie_title, model, vectorizer):\n",
+        "    movie_tfidf = vectorizer.transform([movie_title])\n",
+        "    rating = model.predict(movie_tfidf)\n",
+        "    return rating[0]\n",
+        "\n",
+        "# Example prediction\n",
+        "movie_title = 'The Dark Knight'\n",
+        "predicted_rating = predict_rating(movie_title, model, tfidf_vectorizer)\n",
+        "print(f\"Predicted rating for '{movie_title}': {predicted_rating}\")\n"
+      ],
+      "metadata": {
+        "id": "pjz5wx_LMM0l"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Explanation:\n",
+        "Importing Libraries: Libraries such as pandas for data manipulation, numpy for numerical computations, sklearn for machine learning functionalities, and matplotlib/seaborn for data visualization are imported.\n",
+        "\n",
+        "Importing Data: The import_data function reads data from a CSV file (movies.csv), assuming it contains columns like 'title', 'genre', and 'rating'.\n",
+        "\n",
+        "Describe Data: The describe_data function provides basic statistical information about the dataset using describe() method of pandas DataFrame.\n",
+        "\n",
+        "Data Visualization: The visualize_data function uses matplotlib and seaborn to create a histogram showing the distribution of movie ratings.\n",
+        "\n",
+        "Data Preprocessing: The preprocess_data function handles missing values, converts genres to lowercase, and performs any other necessary data cleaning steps.\n",
+        "\n",
+        "Define Target Variable: The target variable (y) is defined as the 'rating' column from the dataset, while the features (X) include 'title' and 'genre'.\n",
+        "\n",
+        "Train-Test Split: The dataset is split into training and testing sets using train_test_split from sklearn.model_selection.\n",
+        "\n",
+        "Modeling: A RandomForestRegressor model is trained using movie titles (after converting them to TF-IDF vectors) to predict ratings.\n",
+        "\n",
+        "Model Evaluation: The trained model's performance is evaluated using Mean Squared Error (mean_squared_error from sklearn.metrics).\n",
+        "\n",
+        "Prediction: The predict_rating function predicts the rating for a given movie title using the trained model and TF-IDF vectorizer.\n",
+        "\n",
+        "This example covers the entire pipeline from data import to model evaluation and prediction for a movie recommendation system. Depending on the specific requirements and dataset, you may need to adjust and enhance different parts of the code accordingly."
+      ],
+      "metadata": {
+        "id": "pTrxtWEqMcLg"
+      }
+    }
+  ]
+}
